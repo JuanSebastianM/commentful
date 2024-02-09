@@ -21,12 +21,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Credentials not provided');
         }
 
-        console.log(credentials);
+        console.log({ authorizeCredentials: credentials });
 
+        // TODO: mock data - correct data comes from Prisma
         return {
           id: '1',
-          email: 'email@example.com',
-          name: 'Juan',
+          name: credentials.name,
+          email: credentials.email,
         } satisfies User;
       },
     }),
