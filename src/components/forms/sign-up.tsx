@@ -12,9 +12,12 @@ const SignUpForm = () => {
 
     const formData = new FormData(event.currentTarget);
 
-    const credentials: Record<string, string> = {};
+    const credentials: Record<string, FormDataEntryValue> =
+      {};
 
-    for (const [key, value] of formData.entries()) {
+    const formDataEntries = Array.from(formData.entries());
+
+    for (const [key, value] of formDataEntries) {
       credentials[key] = value;
     }
 
@@ -23,6 +26,7 @@ const SignUpForm = () => {
       ...credentials,
     });
   };
+
   return (
     <form onSubmit={handleFormSubmit}>
       <div className="mt-2">
@@ -46,7 +50,7 @@ const SignUpForm = () => {
 
       <button
         type="submit"
-        className="mt-2 hover:opacity-90 duration-300 rounded-md p-2 text-sm bg-primary w-full"
+        className="my-2 hover:opacity-90 duration-300 rounded-md p-2 text-sm bg-primary w-full"
       >
         Create account
       </button>

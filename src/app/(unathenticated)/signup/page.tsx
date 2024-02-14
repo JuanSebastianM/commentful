@@ -1,5 +1,3 @@
-import type { FormEvent } from 'react';
-
 import Link from 'next/link';
 
 import SignUpForm from '~/components/forms/sign-up';
