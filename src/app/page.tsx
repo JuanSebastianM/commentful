@@ -5,8 +5,6 @@ import { getServerSession } from 'lib/next-auth/get-server-session';
 export default async function Home() {
   const session = await getServerSession();
 
-  console.log({ session });
-
   return (
     <div className="relative min-h-screen">
       <header className="py-4 px-8 flex justify-between items-center bg-primary sticky z-10 top-0 text-black">
@@ -16,10 +14,8 @@ export default async function Home() {
             <li>
               {session ? (
                 <>
-                  <p>Welcome, {session.user!.name}!</p>
-                  <p>
-                    Your email is: {session.user!.email}
-                  </p>
+                  <p>Welcome, {session.user.name}!</p>
+                  <p>Your email is: {session.user.email}</p>
                 </>
               ) : (
                 <Link href="#">Sign in</Link>

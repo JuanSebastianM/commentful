@@ -2,6 +2,8 @@
 
 import type { FormEvent } from 'react';
 
+import { createUser } from 'lib/server-only/create-user';
+
 import { signIn } from 'next-auth/react';
 
 const SignUpForm = () => {
@@ -21,9 +23,18 @@ const SignUpForm = () => {
       credentials[key] = value;
     }
 
+    const { id, name, email, password } = await createUser({
+      name: credentials.name.toString(),
+      email: credentials.email.toString().toLowerCase(),
+      password: credentials.password.toString(),
+    });
+
     await signIn('credentials', {
       callbackUrl: '/',
-      ...credentials,
+      id,
+      name,
+      email,
+      password,
     });
   };
 
