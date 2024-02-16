@@ -1,11 +1,7 @@
 import { prisma } from 'lib/prisma';
 
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import type {
-  NextAuthOptions,
-  Session,
-  User,
-} from 'next-auth';
+import type { NextAuthOptions, Session, User } from 'next-auth';
 import type { Adapter } from 'next-auth/adapters';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -52,13 +48,10 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             name: user.name,
             email: user.email,
-            emailVerified:
-              user.emailVerified?.toISOString() ?? null,
+            emailVerified: user.emailVerified?.toISOString() ?? null,
           } satisfies User;
         } catch {
-          throw new Error(
-            'The email or password provided is incorrect',
-          );
+          throw new Error('The email or password provided is incorrect');
         }
       },
     }),

@@ -6,11 +6,7 @@ declare module 'next-auth' {
     user: User;
   }
 
-  interface User
-    extends Omit<
-      DefaultUser,
-      'id' | 'image' | 'emailVerified'
-    > {
+  interface User extends Omit<DefaultUser, 'id' | 'image' | 'emailVerified'> {
     id: PrismaUser['id'];
     name?: PrismaUser['name'];
     email?: PrismaUser['email'];

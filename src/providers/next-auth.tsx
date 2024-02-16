@@ -10,13 +10,6 @@ interface NextAuthProviderProps {
   children: ReactNode;
 }
 
-export const NextAuthProvider = ({
-  session,
-  children,
-}: NextAuthProviderProps) => {
-  return (
-    <SessionProvider session={session}>
-      {children}
-    </SessionProvider>
-  );
+export const NextAuthProvider = ({ session, children }: NextAuthProviderProps) => {
+  return <SessionProvider session={session}>{children}</SessionProvider>;
 };

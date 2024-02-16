@@ -7,15 +7,12 @@ import { createUser } from 'lib/server-only/create-user';
 import { signIn } from 'next-auth/react';
 
 const SignUpForm = () => {
-  const handleFormSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
 
-    const credentials: Record<string, FormDataEntryValue> =
-      {};
+    const credentials: Record<string, FormDataEntryValue> = {};
 
     const formDataEntries = Array.from(formData.entries());
 
@@ -52,11 +49,7 @@ const SignUpForm = () => {
 
       <div className="mt-2">
         <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-        />
+        <input type="password" name="password" id="password" />
       </div>
 
       <button

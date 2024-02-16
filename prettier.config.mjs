@@ -4,7 +4,7 @@ const prettierConfig = {
   tabWidth: 2,
   semi: true,
   singleQuote: true,
-  printWidth: 60,
+  printWidth: 100,
   quoteProps: 'as-needed',
   bracketSpacing: true,
   arrowParens: 'always',

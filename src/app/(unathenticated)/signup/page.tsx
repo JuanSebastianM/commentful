@@ -11,10 +11,7 @@ const SignUpPage = () => {
 
       <p>
         Already have an account?{' '}
-        <Link
-          href="/signin"
-          className="text-primary hover:opacity-80"
-        >
+        <Link href="/signin" className="text-primary hover:opacity-80">
           Sign in instead
         </Link>
       </p>

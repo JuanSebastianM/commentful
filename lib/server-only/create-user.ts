@@ -8,11 +8,7 @@ export interface CreateUserOptions {
   password: string;
 }
 
-export const createUser = async ({
-  name,
-  email,
-  password,
-}: CreateUserOptions) => {
+export const createUser = async ({ name, email, password }: CreateUserOptions) => {
   const user = await prisma.user.create({
     data: {
       name,
