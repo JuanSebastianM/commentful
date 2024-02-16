@@ -1,12 +1,12 @@
+import { ErrorCodes } from 'lib/errors/next-auth';
 import { prisma } from 'lib/prisma';
 
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import type { NextAuthOptions, Session, User } from 'next-auth';
 import type { Adapter } from 'next-auth/adapters';
-import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-export const authOptions: NextAuthOptions = {
+export const AUTH_OPTIONS: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
@@ -15,11 +15,6 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        name: {
-          label: 'Name',
-          type: 'name',
-          placeholder: 'John Doe',
-        },
         email: {
           label: 'Email',
           type: 'email',
@@ -32,7 +27,7 @@ export const authOptions: NextAuthOptions = {
       },
       authorize: async (credentials) => {
         if (!credentials) {
-          throw new Error('Credentials not provided');
+          throw new Error(ErrorCodes.CREDENTIALS_NOT_FOUND);
         }
 
         console.log({ authorizeCredentials: credentials });
@@ -51,7 +46,7 @@ export const authOptions: NextAuthOptions = {
             emailVerified: user.emailVerified?.toISOString() ?? null,
           } satisfies User;
         } catch {
-          throw new Error('The email or password provided is incorrect');
+          throw new Error(ErrorCodes.INVALID_CREDENTIALS);
         }
       },
     }),
