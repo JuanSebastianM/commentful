@@ -2,11 +2,14 @@
 
 import type { FormEvent } from 'react';
 
-import { createUser } from 'lib/server-only/create-user';
+import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
+import { trpc } from 'lib/trpc/react';
 
 import { signIn } from 'next-auth/react';
 
 const SignUpForm = () => {
+  const { mutateAsync: signUp } = trpc.auth.signup.useMutation();
+
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -20,19 +23,32 @@ const SignUpForm = () => {
       credentials[key] = value;
     }
 
-    const { id, name, email, password } = await createUser({
-      name: credentials.name.toString(),
-      email: credentials.email.toString().toLowerCase(),
-      password: credentials.password.toString(),
-    });
+    try {
+      const { id, name, email, password } = await signUp({
+        name: credentials.name.toString(),
+        email: credentials.email.toString().toLowerCase(),
+        password: credentials.password.toString(),
+      });
 
-    await signIn('credentials', {
-      callbackUrl: '/',
-      id,
-      name,
-      email,
-      password,
-    });
+      // TODO: invoke toaster with successful message
+
+      await signIn('credentials', {
+        callbackUrl: '/',
+        id,
+        name,
+        email,
+        password,
+      });
+    } catch (error) {
+      console.error(error);
+
+      // TODO: invoke toaster instead with error messages
+      console.error(
+        error instanceof Error && ERROR_MESSAGES[error.message as keyof typeof ErrorCodes] // TODO: must check if `error.message` is a key in ErrorCodes
+          ? ERROR_MESSAGES[error.message as keyof typeof ErrorCodes]
+          : ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR],
+      );
+    }
   };
 
   return (

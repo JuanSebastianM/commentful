@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-import { getServerSession } from 'lib/next-auth/get-server-session';
+import { TrpcProvider } from 'lib/trpc/react';
+
+import { getServerSession } from 'next-auth';
 
 import { NextAuthProvider } from '~/providers/next-auth';
 
@@ -25,7 +27,9 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <NextAuthProvider session={session}>{children}</NextAuthProvider>
+        <NextAuthProvider session={session}>
+          <TrpcProvider>{children}</TrpcProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

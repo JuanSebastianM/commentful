@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { getServerSession } from 'lib/next-auth/get-server-session';
+import { getServerSession } from 'next-auth';
 
 import Header from '~/components/layout/header';
 
