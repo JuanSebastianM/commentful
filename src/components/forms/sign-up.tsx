@@ -8,7 +8,7 @@ import { trpc } from 'lib/trpc/react';
 import { signIn } from 'next-auth/react';
 
 const SignUpForm = () => {
-  const { mutateAsync: signUp } = trpc.auth.signup.useMutation();
+  const { mutateAsync: signUp, isPending } = trpc.auth.signup.useMutation();
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -21,6 +21,14 @@ const SignUpForm = () => {
 
     for (const [key, value] of formDataEntries) {
       credentials[key] = value;
+    }
+
+    // if there's at least 1 field with falsy value, do not submit form
+    if (Object.values(credentials).some((value) => !value)) {
+      // TODO: invoke toaster with message from below
+      console.error('All fields must be filled');
+
+      return;
     }
 
     try {
@@ -70,9 +78,10 @@ const SignUpForm = () => {
 
       <button
         type="submit"
-        className="my-2 hover:opacity-90 duration-300 rounded-md p-2 text-sm bg-primary w-full"
+        disabled={isPending}
+        className="my-2 hover:opacity-90 duration-300 rounded-md p-2 text-sm bg-primary w-full disabled:bg-primary/50 disabled:pointer-events-none"
       >
-        Create account
+        {isPending ? 'Creating account...' : 'Create account'}
       </button>
     </form>
   );

@@ -1,5 +1,3 @@
-'use server';
-
 import { SALT_ROUNDS } from 'lib/constants/next-auth';
 import { ErrorCodes } from 'lib/errors/next-auth';
 import { prisma } from 'lib/prisma';
