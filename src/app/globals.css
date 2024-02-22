@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: 132 204 22 / 1;
-}
-
 h1 {
   @apply text-3xl font-bold;
 }
@@ -19,7 +15,13 @@ label {
 }
 
 input {
-  @apply border-2 bg-transparent text-sm py-2 px-3 rounded-md border-primary w-full border-lime-500;
+  @apply border-2 bg-transparent text-sm py-2 px-3 rounded-md border-primary w-full;
+}
+
+@layer base {
+  :root {
+    --primary: 132 204 22;
+  }
 }
 
 @layer utilities {
