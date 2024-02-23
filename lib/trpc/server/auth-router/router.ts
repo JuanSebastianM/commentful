@@ -13,7 +13,7 @@ export const authRouter = router({
 
       const user = await createUser({
         name,
-        email,
+        email: email.toLowerCase(),
         password,
       });
 

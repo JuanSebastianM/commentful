@@ -10,10 +10,10 @@ interface HeaderProps {
 
 const Header = ({ user }: HeaderProps) => {
   return (
-    <header className="py-4 px-8 flex justify-between items-center bg-primary sticky z-10 top-0 text-black">
+    <header className="sticky top-0 z-10 flex items-center justify-between bg-primary px-8 py-4 text-black">
       <h1>Commentful</h1>
       <nav>
-        <ul className="flex justify-evenly items-center gap-8">
+        <ul className="flex items-center justify-evenly gap-8">
           {user ? (
             <li>
               <p>Welcome, {user.name}!</p>
