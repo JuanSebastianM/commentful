@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const ZPasswordSchema = z
   .string()
-  .regex(new RegExp('.*[A-Z].*'), { message: 'One uppercase character' })
-  .regex(new RegExp('.*[a-z].*'), { message: 'One lowercase character' })
-  .regex(new RegExp('.*\\d.*'), { message: 'One number' })
+  .regex(new RegExp('.*[A-Z].*'), { message: 'One uppercase character is required' })
+  .regex(new RegExp('.*[a-z].*'), { message: 'One lowercase character is required' })
+  .regex(new RegExp('.*\\d.*'), { message: 'One number is required' })
   .regex(new RegExp('.*[`~<>?,./!@#$%^&*()\\-_+="\'|{}\\[\\];:\\\\].*'), {
     message: 'One special character is required',
   })

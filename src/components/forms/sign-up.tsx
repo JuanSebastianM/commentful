@@ -1,44 +1,52 @@
 'use client';
 
-import type { FormEvent } from 'react';
-
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
 import { trpc } from 'lib/trpc/react';
+import { ZPasswordSchema } from 'lib/trpc/server/auth-router/schema';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Button } from '~/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '~/components/ui/form';
+import { Input } from '~/components/ui/input';
+
+const ZSignUpFormSchema = z.object({
+  name: z.string().min(1, { message: 'Please enter a valid name' }),
+  email: z.string().email(),
+  password: ZPasswordSchema,
+});
+
+type TSignUpFormSchema = z.infer<typeof ZSignUpFormSchema>;
 
 const SignUpForm = () => {
-  const { mutateAsync: signUp, isPending } = trpc.auth.signup.useMutation();
+  const { mutateAsync: signUp, isPending, isSuccess } = trpc.auth.signup.useMutation();
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const form = useForm<TSignUpFormSchema>({
+    resolver: zodResolver(ZSignUpFormSchema),
+    defaultValues: { name: '', email: '', password: '' },
+  });
 
-    const formData = new FormData(event.currentTarget);
-
-    const credentials: Record<string, FormDataEntryValue> = {};
-
-    const formDataEntries = Array.from(formData.entries());
-
-    for (const [key, value] of formDataEntries) {
-      credentials[key] = value;
-    }
-
-    // if there's at least 1 field with falsy value, do not submit form
-    if (Object.values(credentials).some((value) => !value)) {
-      // TODO: invoke toaster with message from below
-      console.error('All fields must be filled');
-
-      return;
-    }
-
+  const onFormSubmit = async (values: TSignUpFormSchema) => {
     try {
       const { id, name, email, password } = await signUp({
-        name: credentials.name.toString(),
-        email: credentials.email.toString().toLowerCase(),
-        password: credentials.password.toString(),
+        name: values.name,
+        email: values.email,
+        password: values.password,
       });
 
-      // TODO: invoke toaster with successful message
+      if (isSuccess) {
+        // TODO: invoke toaster with successful message
+      }
 
       await signIn('credentials', {
         callbackUrl: '/',
@@ -60,30 +68,62 @@ const SignUpForm = () => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <div className="mt-2">
-        <label htmlFor="name">Name</label>
-        <input type="text" name="name" id="name" />
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onFormSubmit)}>
+        <fieldset disabled={isPending || isSuccess}>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="John Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <div className="mt-2">
-        <label htmlFor="email">Email</label>
-        <input type="email" name="email" id="email" />
-      </div>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="youremail@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <div className="mt-2">
-        <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
-      </div>
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </fieldset>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="my-2 hover:opacity-90 duration-300 rounded-md p-2 text-sm bg-primary w-full disabled:bg-primary/50 disabled:pointer-events-none"
-      >
-        {isPending ? 'Creating account...' : 'Create account'}
-      </button>
-    </form>
+        <Button
+          type="submit"
+          variant="default"
+          disabled={isPending || isSuccess}
+          className="my-2 w-full p-2 duration-300"
+        >
+          {isPending ? 'Signing up...' : 'Sign up'}
+        </Button>
+      </form>
+    </Form>
   );
 };
 
