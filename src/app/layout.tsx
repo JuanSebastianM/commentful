@@ -1,15 +1,20 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter as FontSans } from 'next/font/google';
 
 import { TrpcProvider } from 'lib/trpc/react';
+import { cn } from 'lib/utils/ui';
 
 import { getServerSession } from 'next-auth';
 
+import { Toaster } from '~/components/ui/toaster';
 import { NextAuthProvider } from '~/providers/next-auth';
 
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+export const fontSans = FontSans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Commentful',
@@ -26,9 +31,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
         <NextAuthProvider session={session}>
-          <TrpcProvider>{children}</TrpcProvider>
+          <TrpcProvider>
+            {children}
+            <Toaster />
+          </TrpcProvider>
         </NextAuthProvider>
       </body>
     </html>

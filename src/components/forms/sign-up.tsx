@@ -1,10 +1,14 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
 import { trpc } from 'lib/trpc/react';
 import { ZPasswordSchema } from 'lib/trpc/server/auth-router/schema';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { TRPCClientError } from '@trpc/client';
+import { TRPCError } from '@trpc/server';
 import { signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,6 +23,7 @@ import {
   FormMessage,
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
+import { useToast } from '~/components/ui/use-toast';
 
 const ZSignUpFormSchema = z.object({
   name: z.string().min(1, { message: 'Please enter a valid name' }),
@@ -29,6 +34,9 @@ const ZSignUpFormSchema = z.object({
 type TSignUpFormSchema = z.infer<typeof ZSignUpFormSchema>;
 
 const SignUpForm = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const { mutateAsync: signUp, isPending, isSuccess } = trpc.auth.signup.useMutation();
 
   const form = useForm<TSignUpFormSchema>({
@@ -44,26 +52,36 @@ const SignUpForm = () => {
         password: values.password,
       });
 
-      if (isSuccess) {
-        // TODO: invoke toaster with successful message
+      if (id) {
+        toast({
+          title: 'Account succesfully created!',
+          description:
+            'Your account was created successfully. You can now work on your Markdown drafts.',
+        });
       }
 
-      await signIn('credentials', {
+      const result = await signIn('credentials', {
         callbackUrl: '/',
         id,
         name,
         email,
         password,
+        redirect: false,
       });
-    } catch (error) {
-      console.error(error);
 
-      // TODO: invoke toaster instead with error messages
-      console.error(
-        error instanceof Error && ERROR_MESSAGES[error.message as keyof typeof ErrorCodes] // TODO: must check if `error.message` is a key in ErrorCodes
-          ? ERROR_MESSAGES[error.message as keyof typeof ErrorCodes]
-          : ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR],
-      );
+      if (!result?.url) {
+        throw new Error(ErrorCodes.UNKNOWN_ERROR);
+      }
+
+      router.push(result.url);
+    } catch (error) {
+      let description = ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR];
+
+      if (error instanceof TRPCClientError && error.data?.code === 'BAD_REQUEST') {
+        description = error.message;
+      }
+
+      toast({ variant: 'destructive', description });
     }
   };
 
