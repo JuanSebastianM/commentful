@@ -20,7 +20,7 @@ const Header = ({ user }: HeaderProps) => {
               <p>Your email is: {user.email}</p>
             </li>
           ) : null}
-          <li>{user ? <SignOutButton /> : <Link href="/api/auth/signin">Sign in</Link>}</li>
+          <li>{user ? <SignOutButton /> : <Link href="/signin">Sign in</Link>}</li>
         </ul>
       </nav>
     </header>

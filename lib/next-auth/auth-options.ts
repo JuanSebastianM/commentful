@@ -2,11 +2,16 @@ import { ErrorCodes } from 'lib/errors/next-auth';
 import { prisma } from 'lib/prisma';
 
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import { compare } from 'bcrypt';
 import type { NextAuthOptions, Session, User } from 'next-auth';
 import type { Adapter } from 'next-auth/adapters';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const AUTH_OPTIONS: NextAuthOptions = {
+  pages: {
+    signIn: '/signin',
+    error: '/signin',
+  },
   adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
@@ -18,7 +23,6 @@ export const AUTH_OPTIONS: NextAuthOptions = {
         email: {
           label: 'Email',
           type: 'email',
-          placeholder: 'youremail@example.com',
         },
         password: {
           label: 'Password',
@@ -38,6 +42,16 @@ export const AUTH_OPTIONS: NextAuthOptions = {
               email: credentials.email.toLowerCase(),
             },
           });
+
+          if (!user.password) {
+            throw new Error(ErrorCodes.NO_PASSWORD_ACCOUNT);
+          }
+
+          const samePassword = await compare(credentials.password, user.password);
+
+          if (!samePassword) {
+            throw new Error(ErrorCodes.INVALID_CREDENTIALS);
+          }
 
           return {
             id: user.id,

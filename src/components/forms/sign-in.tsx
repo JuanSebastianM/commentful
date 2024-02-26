@@ -1,11 +1,11 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
-import { trpc } from 'lib/trpc/react';
 import { ZPasswordSchema } from 'lib/trpc/server/auth-router/schema';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TRPCClientError } from '@trpc/client';
 import { signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,57 +22,47 @@ import {
 import { Input } from '~/components/ui/input';
 import { useToast } from '~/components/ui/use-toast';
 
-const ZSignUpFormSchema = z.object({
-  name: z.string().min(1, { message: 'Please enter a valid name' }),
+const ZSignInFormSchema = z.object({
   email: z.string().email(),
   password: ZPasswordSchema,
 });
 
-type TSignUpFormSchema = z.infer<typeof ZSignUpFormSchema>;
+type TSignInFormSchema = z.infer<typeof ZSignInFormSchema>;
 
-const SignUpForm = () => {
+const SignInForm = () => {
   const { toast } = useToast();
+  const router = useRouter();
 
-  const { mutateAsync: signUp, isPending, isSuccess } = trpc.auth.signup.useMutation();
-
-  const form = useForm<TSignUpFormSchema>({
-    resolver: zodResolver(ZSignUpFormSchema),
-    defaultValues: { name: '', email: '', password: '' },
+  const form = useForm<TSignInFormSchema>({
+    resolver: zodResolver(ZSignInFormSchema),
+    defaultValues: { email: '', password: '' },
   });
 
-  const onFormSubmit = async (values: TSignUpFormSchema) => {
+  const isSubmitting = form.formState.isSubmitting;
+
+  const onFormSubmit = async (values: TSignInFormSchema) => {
     try {
-      const { email } = await signUp({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      });
-
-      if (email) {
-        toast({
-          title: 'Account succesfully created!',
-          description:
-            'Your account was created successfully. You can now work on your Markdown drafts.',
-        });
-      }
-
       const result = await signIn('credentials', {
         callbackUrl: '/',
-        email,
+        email: values.email,
         password: values.password,
         redirect: false,
       });
 
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
       if (!result?.url) {
-        throw new Error(ErrorCodes.UNKNOWN_ERROR);
+        throw new Error(ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR]);
       }
 
       window.location.href = result.url;
     } catch (error) {
       let description = ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR];
 
-      if (error instanceof TRPCClientError && error.data?.code === 'BAD_REQUEST') {
-        description = error.message;
+      if (error instanceof Error && ERROR_MESSAGES[error.message as keyof typeof ErrorCodes]) {
+        description = ERROR_MESSAGES[error.message as keyof typeof ErrorCodes];
       }
 
       toast({ variant: 'destructive', description });
@@ -82,21 +72,7 @@ const SignUpForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onFormSubmit)}>
-        <fieldset disabled={isPending || isSuccess}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input type="text" placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+        <fieldset disabled={isSubmitting}>
           <FormField
             control={form.control}
             name="email"
@@ -104,7 +80,7 @@ const SignUpForm = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="youremail@example.com" {...field} />
+                  <Input type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -129,14 +105,14 @@ const SignUpForm = () => {
         <Button
           type="submit"
           variant="default"
-          disabled={isPending || isSuccess}
+          disabled={isSubmitting}
           className="my-2 w-full p-2 duration-300"
         >
-          {isPending ? 'Signing up...' : 'Sign up'}
+          {isSubmitting ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
     </Form>
   );
 };
 
-export default SignUpForm;
+export default SignInForm;
