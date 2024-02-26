@@ -11,7 +11,7 @@ import { NextAuthProvider } from '~/providers/next-auth';
 
 import './globals.css';
 
-export const fontSans = FontSans({
+const fontSans = FontSans({
   subsets: ['latin'],
   variable: '--font-sans',
 });
