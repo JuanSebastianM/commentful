@@ -15,7 +15,7 @@ export default async function Home() {
           <h2>Your Drafts</h2>
           <ul className="my-8">
             <li>
-              <Link href="#">My first draft</Link>
+              <Link href="/draft/123">My first draft</Link>
             </li>
           </ul>
         </section>

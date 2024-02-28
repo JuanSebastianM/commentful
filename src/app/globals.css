@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+.ProseMirror {
+  outline: none;
+  min-height: 100vh;
+  padding-bottom: 150px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #64748b;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror .is-empty::before {
+  color: #64748b;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror p {
+  color: rgb(17, 17, 17);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -80,6 +106,10 @@
 
   h2 {
     @apply text-2xl font-bold;
+  }
+
+  .draft-container div:first-child {
+    @apply col-span-8;
   }
 }
 
