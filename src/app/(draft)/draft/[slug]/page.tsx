@@ -10,7 +10,7 @@ const DraftPage = () => {
         <Link href="/preview">Preview</Link>
       </header>
       <main>
-        <article className="draft-container relative mx-auto grid grid-cols-10 md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl">
+        <article className="wysiwyg-editor container relative grid grid-cols-12">
           <Tiptap></Tiptap>
         </article>
       </main>
