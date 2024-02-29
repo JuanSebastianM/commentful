@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
 import { ZPasswordSchema } from 'lib/trpc/server/auth-router/schema';
 
@@ -31,7 +29,6 @@ type TSignInFormSchema = z.infer<typeof ZSignInFormSchema>;
 
 const SignInForm = () => {
   const { toast } = useToast();
-  const router = useRouter();
 
   const form = useForm<TSignInFormSchema>({
     resolver: zodResolver(ZSignInFormSchema),

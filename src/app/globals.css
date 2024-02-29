@@ -108,8 +108,8 @@
     @apply text-2xl font-bold;
   }
 
-  .draft-container div:first-child {
-    @apply col-span-8;
+  .wysiwyg-editor > div:first-child {
+    @apply col-span-12 md:col-span-8;
   }
 }
 
