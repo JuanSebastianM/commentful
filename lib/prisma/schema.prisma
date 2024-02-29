@@ -18,6 +18,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  ownDrafts     Draft[]
+  sharedDrafts  String[]
 }
 
 model Account {
@@ -53,4 +55,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Draft {
+  id                 String   @id @default(uuid())
+  authorEmail        String
+  title              String
+  content            Content?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+  contributorsEmails String[]
+
+  author User @relation(fields: [authorEmail], references: [email], onDelete: Cascade)
+}
+
+model Content {
+  draftId  String @id
+  html     String
+  markdown String
+
+  draft Draft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 }
