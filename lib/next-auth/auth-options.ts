@@ -34,8 +34,6 @@ export const AUTH_OPTIONS: NextAuthOptions = {
           throw new Error(ErrorCodes.CREDENTIALS_NOT_FOUND);
         }
 
-        console.log({ authorizeCredentials: credentials });
-
         try {
           const user = await prisma.user.findFirstOrThrow({
             where: {

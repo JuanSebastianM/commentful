@@ -11,6 +11,7 @@
     "prisma:generate": "npm run with-env -- npx prisma generate",
     "prisma:migrate-dev": "npm run with-env -- npx prisma migrate dev",
     "prisma:studio": "npm run with-env -- npx prisma studio",
+    "prisma:seed": "npm run with-env -- npx prisma db seed",
     "with-env": "dotenv -e .env -e .env.local --"
   },
   "dependencies": {
@@ -58,9 +59,11 @@
     "prettier-plugin-tailwindcss": "^0.5.11",
     "prisma": "^5.9.1",
     "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   },
   "prisma": {
-    "schema": "lib/prisma/schema.prisma"
+    "schema": "lib/prisma/schema.prisma",
+    "seed": "ts-node --transpile-only --project lib/prisma/tsconfig.seed.json lib/prisma/seed.ts"
   }
 }

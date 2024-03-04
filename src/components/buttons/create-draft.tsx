@@ -32,8 +32,6 @@ export const CreateDraftButton = ({ children, ...props }: ButtonProps) => {
 
       router.push(`/draft/${draft.id}`);
     } catch (error) {
-      console.error(error);
-
       let description = ERROR_MESSAGES[ErrorCodes.UNKNOWN_ERROR];
 
       if (error instanceof TRPCClientError && error.data?.code === 'BAD_REQUEST') {
