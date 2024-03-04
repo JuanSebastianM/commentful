@@ -1,7 +1,6 @@
 'use client';
 
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
-import { ZPasswordSchema } from 'lib/trpc/server/auth-router/schema';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
@@ -22,7 +21,7 @@ import { useToast } from '~/components/ui/use-toast';
 
 const ZSignInFormSchema = z.object({
   email: z.string().email(),
-  password: ZPasswordSchema,
+  password: z.string().min(1, 'This field is required'),
 });
 
 type TSignInFormSchema = z.infer<typeof ZSignInFormSchema>;

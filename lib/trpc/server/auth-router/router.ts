@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES, ErrorCodes } from 'lib/errors/next-auth';
-import { createUser } from 'lib/server-only/create-user';
+import { createUser } from 'lib/server-only/user/create-user';
 import { ZSignUpMutationSchema } from 'lib/trpc/server/auth-router/schema';
 
 import { TRPCError } from '@trpc/server';

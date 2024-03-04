@@ -16,7 +16,11 @@ model User {
   updatedAt     DateTime  @default(now()) @updatedAt
   emailVerified DateTime?
   image         String?
+  sharedDrafts  String[]
   accounts      Account[]
+  comments      Comment[]
+  ownDrafts     Draft[]
+  replies       Reply[]
   sessions      Session[]
 }
 
@@ -26,15 +30,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -53,4 +56,71 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Draft {
+  id                 String    @id @default(uuid())
+  authorEmail        String
+  title              String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now()) @updatedAt
+  contributorsEmails String[]
+  savedIds           String[]
+  comments           Comment[]
+  content            Content?
+
+  author User @relation(fields: [authorEmail], references: [email], onDelete: Cascade)
+}
+
+model Content {
+  draftId  String @id
+  html     String
+  markdown String
+
+  draft Draft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id           String        @id @default(uuid())
+  authorEmail  String
+  draftId      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
+  content      String
+  replies      Reply[]
+  selectedText SelectedText?
+
+  author User  @relation(fields: [authorEmail], references: [email], onDelete: Cascade)
+  draft  Draft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+}
+
+model SelectedText {
+  id            String         @id @default(uuid())
+  content       String
+  startOffset   Int
+  endOffset     Int
+  commentId     String         @unique
+  parentElement ParentElement?
+
+  comment Comment @relation(fields: [commentId], references: [id])
+}
+
+model ParentElement {
+  id              String
+  fullTextContent String
+  selectedTextId  String @unique
+
+  selectedText SelectedText @relation(fields: [selectedTextId], references: [id], onDelete: Cascade)
+}
+
+model Reply {
+  id          String   @id @default(uuid())
+  commentId   String
+  authorEmail String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  author  User    @relation(fields: [authorEmail], references: [email])
+  comment Comment @relation(fields: [commentId], references: [id])
 }
