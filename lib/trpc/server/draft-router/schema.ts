@@ -5,3 +5,5 @@ export const ZUpdateContentMutationSchema = z.object({
   html: z.string(),
   markdown: z.string(),
 });
+
+export const ZGetContentByDraftIdSchema = ZUpdateContentMutationSchema.pick({ draftId: true });
