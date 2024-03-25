@@ -8,21 +8,46 @@ interface UpdateContentProps {
   markdown: string;
 }
 
-export const updateContent = async ({ userEmail, draftId, html, markdown }: UpdateContentProps) => {
-  const draft = await prisma.draft.findFirst({ where: { id: draftId } });
+type UpdatedContentInfo = Omit<
+  UpdateContentProps,
+  'userEmail'
+>;
+
+export const updateContent = async ({
+  userEmail,
+  draftId,
+  html,
+  markdown,
+}: UpdateContentProps): Promise<UpdatedContentInfo> => {
+  const draft = await prisma.draft.findFirst({
+    where: { id: draftId },
+  });
 
   if (!draft) {
     throw new Error(ErrorCodes.NO_DRAFT_FOUND);
   }
 
-  if (![draft.authorEmail, ...draft.contributorsEmails].includes(userEmail)) {
+  if (
+    ![
+      draft.authorEmail,
+      ...draft.contributorsEmails,
+    ].includes(userEmail)
+  ) {
     throw new Error(ErrorCodes.UNAUTHORIZED_USER);
   }
 
-  const updatedContent = await prisma.content.update({
-    where: { draftId },
-    data: { html, markdown },
-  });
+  const [updatedContent] = await prisma.$transaction([
+    prisma.content.update({
+      where: { draftId },
+      data: { html, markdown },
+    }),
+    prisma.draft.update({
+      where: { id: draftId },
+      data: {
+        updatedAt: new Date().toISOString(),
+      },
+    }),
+  ]);
 
   return updatedContent;
 };

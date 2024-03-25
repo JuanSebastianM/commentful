@@ -6,7 +6,15 @@ interface GetContentByDraftIdProps {
   draftId: string;
 }
 
-export const getContentByDraftId = async ({ userEmail, draftId }: GetContentByDraftIdProps) => {
+interface ContentInfo {
+  html: string;
+  markdown: string;
+}
+
+export const getContentByDraftId = async ({
+  userEmail,
+  draftId,
+}: GetContentByDraftIdProps): Promise<ContentInfo> => {
   const draftContent = await prisma.content.findFirst({
     where: { draftId },
     include: { draft: true },
@@ -17,10 +25,16 @@ export const getContentByDraftId = async ({ userEmail, draftId }: GetContentByDr
   }
 
   if (
-    ![draftContent.draft.authorEmail, ...draftContent.draft.contributorsEmails].includes(userEmail)
+    ![
+      draftContent.draft.authorEmail,
+      ...draftContent.draft.contributorsEmails,
+    ].includes(userEmail)
   ) {
     throw new Error(ErrorCodes.UNAUTHORIZED_USER);
   }
 
-  return { html: draftContent.html, markdown: draftContent.markdown };
+  return {
+    html: draftContent.html,
+    markdown: draftContent.markdown,
+  };
 };
