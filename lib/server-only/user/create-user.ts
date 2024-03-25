@@ -2,6 +2,7 @@ import { SALT_ROUNDS } from 'lib/constants/next-auth';
 import { ErrorCodes } from 'lib/errors/next-auth';
 import { prisma } from 'lib/prisma';
 
+import { User } from '@prisma/client';
 import { hash } from 'bcrypt';
 
 export interface CreateUserOptions {
@@ -10,22 +11,31 @@ export interface CreateUserOptions {
   password: string;
 }
 
-export const createUser = async ({ name, email, password }: CreateUserOptions) => {
+type CreatedUserInfo = Omit<User, 'password'>;
+
+export const createUser = async ({
+  name,
+  email,
+  password,
+}: CreateUserOptions): Promise<CreatedUserInfo> => {
   const hashedPassword = await hash(password, SALT_ROUNDS);
 
-  const userExists = await prisma.user.findFirst({ where: { email } });
+  const userExists = await prisma.user.findFirst({
+    where: { email },
+  });
 
   if (userExists) {
     throw new Error(ErrorCodes.USER_EXISTS);
   }
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  });
+  const { password: newUserPassword, ...rest } =
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
 
-  return user;
+  return rest;
 };

@@ -1,21 +1,39 @@
 import { ErrorCodes } from 'lib/errors/draft';
 import { prisma } from 'lib/prisma';
 
-export const createDraft = async (email: string) => {
-  const user = await prisma.user.findFirst({ where: { email } });
+interface CreatedDraftInfo {
+  id: string;
+  title: string;
+  createdAt: Date;
+}
+
+const DEFAULT_DRAFT_TITLE = 'Untitled';
+
+export const createDraft = async (
+  email: string,
+): Promise<CreatedDraftInfo> => {
+  const user = await prisma.user.findFirst({
+    where: { email },
+  });
 
   if (!user) {
     throw new Error(ErrorCodes.NO_USER_FOUND);
   }
 
-  const draft = await prisma.draft.create({
+  const createdDraft = await prisma.draft.create({
     data: {
       author: { connect: { email: user.email } },
-      title: '',
+      title: DEFAULT_DRAFT_TITLE,
       contributorsEmails: [],
       content: { create: { html: '', markdown: '' } },
     },
   });
 
-  return draft;
+  const data = {
+    id: createdDraft.id,
+    title: createdDraft.title,
+    createdAt: createdDraft.createdAt,
+  };
+
+  return data;
 };

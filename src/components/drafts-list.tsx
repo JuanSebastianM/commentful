@@ -16,9 +16,12 @@ export const DraftsList = () => {
           ? drafts.data.map((draft) => (
               <li key={draft.id}>
                 <p>
-                  blog id: <Link href={`/draft/${draft.id}`}>{draft.id}</Link>
+                  blog id:{' '}
+                  <Link href={`/draft/${draft.id}`}>
+                    {draft.id}
+                  </Link>
                 </p>
-                <p>blog author: {draft.authorEmail}</p>
+                <p>blog title: {draft.title}</p>
               </li>
             ))
           : null}
