@@ -8,7 +8,11 @@ import { trpc } from 'lib/trpc/react';
 
 import Placeholder from '@tiptap/extension-placeholder';
 import { EditorProvider } from '@tiptap/react';
-import type { EditorEvents, EditorOptions, Extensions } from '@tiptap/react';
+import type {
+  EditorEvents,
+  EditorOptions,
+  Extensions,
+} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Markdown } from 'tiptap-markdown';
 import { useDebouncedCallback } from 'use-debounce';
@@ -24,7 +28,8 @@ const Tiptap = ({ children }: TiptapProps) => {
 
   const draftId = slug as string;
 
-  const { mutateAsync: updateContent } = trpc.draft.updateContent.useMutation();
+  const { mutateAsync: updateContent } =
+    trpc.draft.updateContent.useMutation();
 
   const extensions: Extensions | undefined = [
     StarterKit,
@@ -49,8 +54,12 @@ const Tiptap = ({ children }: TiptapProps) => {
   };
 
   const debouncedUpdates = useDebouncedCallback(
-    async ({ editor, transaction }: EditorEvents['update']) => {
-      const markdown = editor.storage.markdown.getMarkdown();
+    async ({
+      editor,
+      transaction,
+    }: EditorEvents['update']) => {
+      const markdown =
+        editor.storage.markdown.getMarkdown();
       const html = editor.getHTML();
 
       // TODO: replace this with the logic to update the savedIds field
@@ -61,13 +70,11 @@ const Tiptap = ({ children }: TiptapProps) => {
     DEBOUNCE_DURATION,
   );
 
-  const onUpdate = ({ editor, transaction }: EditorEvents['update']) => {
-    // This is so we don't save when the editor is empty but when there's content
-    if (
-      transaction.doc.content.childCount === 1 &&
-      transaction.doc.content.firstChild?.content.size === 0
-    )
-      return null;
+  const onUpdate = ({
+    editor,
+    transaction,
+  }: EditorEvents['update']) => {
+    if (!transaction.docChanged) return null;
 
     debouncedUpdates({ editor, transaction });
   };
