@@ -1,72 +1,106 @@
-import { ERROR_MESSAGES, ErrorCodes, isDraftErrorCode } from 'lib/errors/draft';
+import {
+  ERROR_MESSAGES,
+  ErrorCodes,
+  isDraftErrorCode,
+} from 'lib/errors/draft';
 import type { ControlledDraftErrorCode } from 'lib/errors/draft';
 import { createDraft } from 'lib/server-only/draft/create-draft';
 import { getAllByUserEmail } from 'lib/server-only/draft/get-all-by-user-email';
 import { getContentByDraftId } from 'lib/server-only/draft/get-content-by-draft-id';
+import { getDraftById } from 'lib/server-only/draft/get-draft-by-id';
 import { updateContent } from 'lib/server-only/draft/update-content';
 import {
-  ZGetContentByDraftIdSchema,
+  ZGetByDraftIdSchema,
   ZUpdateContentMutationSchema,
 } from 'lib/trpc/server/draft-router/schema';
-import { authenticatedProcedure, router } from 'lib/trpc/server/trpc';
+import {
+  authenticatedProcedure,
+  router,
+} from 'lib/trpc/server/trpc';
 
 import { TRPCError } from '@trpc/server';
 
 export const draftRouter = router({
-  create: authenticatedProcedure.mutation(async ({ ctx }) => {
-    try {
-      const { email } = ctx.session.user;
+  create: authenticatedProcedure.mutation(
+    async ({ ctx }) => {
+      try {
+        const { email } = ctx.session.user;
 
-      const draft = await createDraft(email ?? '');
+        const draft = await createDraft(email ?? '');
 
-      return draft;
-    } catch (error) {
-      let message = ERROR_MESSAGES[ErrorCodes.FAILED_DRAFT_CREATION];
+        return draft;
+      } catch (error) {
+        let message =
+          ERROR_MESSAGES[ErrorCodes.FAILED_DRAFT_CREATION];
 
-      if (error instanceof Error && error.message === ErrorCodes.NO_USER_FOUND) {
-        message = ERROR_MESSAGES[ErrorCodes.NO_USER_FOUND];
+        if (
+          error instanceof Error &&
+          error.message === ErrorCodes.NO_USER_FOUND
+        ) {
+          message =
+            ERROR_MESSAGES[ErrorCodes.NO_USER_FOUND];
+        }
+
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message,
+        });
       }
+    },
+  ),
+  getAllByUserEmail: authenticatedProcedure.query(
+    async ({ ctx }) => {
+      try {
+        const { email } = ctx.session.user;
 
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message,
-      });
-    }
-  }),
-  getAllByUserEmail: authenticatedProcedure.query(async ({ ctx }) => {
-    try {
-      const { email } = ctx.session.user;
+        const drafts = await getAllByUserEmail(email ?? '');
 
-      const drafts = await getAllByUserEmail(email ?? '');
+        return drafts;
+      } catch (error) {
+        let message =
+          ERROR_MESSAGES[
+            ErrorCodes.FAILED_ALL_DRAFTS_RETRIEVAL
+          ];
 
-      return drafts;
-    } catch (error) {
-      let message = ERROR_MESSAGES[ErrorCodes.FAILED_ALL_DRAFTS_RETRIEVAL];
+        if (
+          error instanceof Error &&
+          error.message in ErrorCodes
+        ) {
+          message =
+            ERROR_MESSAGES[
+              error.message as keyof typeof ErrorCodes
+            ];
+        }
 
-      if (error instanceof Error && error.message in ErrorCodes) {
-        message = ERROR_MESSAGES[error.message as keyof typeof ErrorCodes];
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message,
+        });
       }
-
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message,
-      });
-    }
-  }),
+    },
+  ),
   getContentByDraftId: authenticatedProcedure
-    .input(ZGetContentByDraftIdSchema)
+    .input(ZGetByDraftIdSchema)
     .query(async ({ ctx, input }) => {
       try {
         const { draftId } = input;
         const { email } = ctx.session.user;
 
-        const draftContent = await getContentByDraftId({ userEmail: email ?? '', draftId });
+        const draftContent = await getContentByDraftId({
+          userEmail: email ?? '',
+          draftId,
+        });
 
         return draftContent;
       } catch (error) {
-        let message = ERROR_MESSAGES[ErrorCodes.FAILED_DRAFT_CONTENT_RETRIEVAL];
+        let message =
+          ERROR_MESSAGES[
+            ErrorCodes.FAILED_DRAFT_CONTENT_RETRIEVAL
+          ];
 
-        if (isDraftErrorCode<ControlledDraftErrorCode>(error)) {
+        if (
+          isDraftErrorCode<ControlledDraftErrorCode>(error)
+        ) {
           message = ERROR_MESSAGES[error.message];
         }
 
@@ -92,9 +126,43 @@ export const draftRouter = router({
 
         return updatedContent;
       } catch (error) {
-        let message = ERROR_MESSAGES.FAILED_DRAFT_CONTENT_UPDATE;
+        let message =
+          ERROR_MESSAGES.FAILED_DRAFT_CONTENT_UPDATE;
 
-        if (isDraftErrorCode<ControlledDraftErrorCode>(error)) {
+        if (
+          isDraftErrorCode<ControlledDraftErrorCode>(error)
+        ) {
+          message = ERROR_MESSAGES[error.message];
+        }
+
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message,
+        });
+      }
+    }),
+  getDraftById: authenticatedProcedure
+    .input(ZGetByDraftIdSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const { draftId } = input;
+        const { email } = ctx.session.user;
+
+        const draft = await getDraftById({
+          userEmail: email ?? '',
+          draftId,
+        });
+
+        return draft;
+      } catch (error) {
+        let message =
+          ERROR_MESSAGES[
+            ErrorCodes.FAILED_DRAFT_INFO_RETRIEVAL
+          ];
+
+        if (
+          isDraftErrorCode<ControlledDraftErrorCode>(error)
+        ) {
           message = ERROR_MESSAGES[error.message];
         }
 
